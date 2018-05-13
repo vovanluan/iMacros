@@ -1,7 +1,7 @@
 var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 var a    = pref.getBranch("network.proxy.");
 
-var vps_order = 14;
+var vps_order = 1;
 var profiles_per_vps = 160;
 var max_vps = 14;
 var max_profiles = profiles_per_vps * max_vps;

@@ -210,7 +210,7 @@ for (i = 1; i < lines.length; i++){
         
         iimPlay(savePendingOrder.replace("MYURL", url).replace("MYSTARTCOUNT", start_count).replace("MYQUANTITY", quantity).replace("MYSERVICE", service).replace("MYSTARTPROFILE", start_profile).replace("MYENDPROFILE", end_profile));
         //Edit start count = currentsubs va edit status thanh In Progress
-        iimPlay(setOrderInProgress.replace("MYPOS", i).replace("MYAMOUNT", start_count));
+        //iimPlay(setOrderInProgress.replace("MYPOS", i).replace("MYAMOUNT", start_count));
     }
     if (status == "In Progress") {
         goal_count = getExtract(8, i);
@@ -218,7 +218,7 @@ for (i = 1; i < lines.length; i++){
         //alert("Goal:" + goal_count);
         if (currentSubs >= goal_count) {
             // Update status thanh Finished
-            iimPlay(setOrderFinish.replace("MYPOS", i));
+            //iimPlay(setOrderFinish.replace("MYPOS", i));
         }
     }
 }
