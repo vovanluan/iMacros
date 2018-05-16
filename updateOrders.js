@@ -1,15 +1,13 @@
 var pref = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
 var a    = pref.getBranch("network.proxy.");
-a.setIntPref("type", 5);
+
 var TIMEPERURRL = 25;
 
-var profiles_per_vps = 160;
-var drop_rate = 0.25;
-var number_of_profiles_need = 0;
+
+var accounts_per_vps = 160;
+var drop_rate = 0.2;
+var number_of_vps_need = 0;
 var max_vps = 14;
-var max_profiles = profiles_per_vps * max_vps;
-var current_profile = 1;
-var start_profile, end_profile;
 var status, currentSubs, quantity, url, start_count, goal_count;
 var a = new Array(100);
 for (var i = 0; i <= 100; i++) {
@@ -26,6 +24,10 @@ var getData = "CODE:";
     getData+=  "SET !DATASOURCE_LINE 1\n";  
     getData += "SET !EXTRACT NULL\n";
     getData += "SET !EXTRACT {{!COLMYCOLUMN}}\n";
+
+
+
+
 
 var goToOrderPage = "CODE:";
     goToOrderPage+= "SET !ERRORIGNORE YES\n";
@@ -127,8 +129,7 @@ var savePendingOrder = "CODE:";
     savePendingOrder += "ADD !EXTRACT MYURL\n";
     savePendingOrder += "ADD !EXTRACT MYSTARTCOUNT\n";
     savePendingOrder += "ADD !EXTRACT MYQUANTITY\n";
-    savePendingOrder += "ADD !EXTRACT MYSTARTPROFILE\n";
-    savePendingOrder += "ADD !EXTRACT MYENDPROFILE\n";
+    savePendingOrder += "ADD !EXTRACT MYVPSARRAY\n";
     savePendingOrder += "ADD !EXTRACT MYSERVICE\n";
     savePendingOrder += "SAVEAS TYPE=EXTRACT FOLDER=C:\\Test FILE=Channels.csv\n";
 
@@ -145,6 +146,22 @@ var saveTime = "CODE:";
 function getExtract(column, n){
     iimPlay(getData.replace("MYCOLUMN", column).replace("SET !DATASOURCE_LINE 1", "SET !DATASOURCE_LINE " + n));
     return iimGetLastExtract();
+}
+
+function getArrayofVPS(number_of_vps_need) {
+    var array_Of_VPS = [];
+    for(var i = 0; i <=100; i++) {
+        for(var j = 0; j < max_vps; j++) {
+            if (number_of_vps_need == 0)
+                break;
+            if (a[i][j] == 0) {
+                array_Of_VPS.push(j + 1);
+                a[i][j] = 1;
+                number_of_vps_need -= 1;
+            }
+        }
+    }
+    return array_Of_VPS;
 }
 
 // Go to list of orders page 
@@ -196,20 +213,13 @@ for (i = 1; i < lines.length; i++){
         url = url.split("?")[0];
         start_count = currentSubs;
         //Luu data vao file Pending Orders
-        number_of_profiles_need = Math.ceil(quantity/(1 - drop_rate));
-        start_profile = current_profile;
-        end_profile = start_profile + number_of_profiles_need - 1;
-        if (end_profile > max_profiles) {
-            end_profile = end_profile - max_profiles;
-        }
-        current_profile = end_profile + 1;
-        if (current_profile > max_profiles) {
-            current_profile = current_profile - max_profiles;
-        }        
-        //alert(number_of_profiles_need);
+        number_of_vps_need = Math.ceil(quantity/((1 - drop_rate) * accounts_per_vps));
+        var array_Of_VPS = getArrayofVPS(number_of_vps_need);
+        //alert(number_of_vps_need);
         
-        iimPlay(savePendingOrder.replace("MYURL", url).replace("MYSTARTCOUNT", start_count).replace("MYQUANTITY", quantity).replace("MYSERVICE", service).replace("MYSTARTPROFILE", start_profile).replace("MYENDPROFILE", end_profile));
-        //Edit start count = currentsubs va edit status thanh In Progress
+        iimPlay(savePendingOrder.replace("MYURL", url).replace("MYSTARTCOUNT", start_count).replace("MYQUANTITY", quantity).replace("MYSERVICE", service).replace("MYVPSARRAY", array_Of_VPS));
+        //Edit start count = currentsubs
+        // Edit status thanh In Progress
         iimPlay(setOrderInProgress.replace("MYPOS", i).replace("MYAMOUNT", start_count));
     }
     if (status == "In Progress") {
